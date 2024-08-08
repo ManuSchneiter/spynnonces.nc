@@ -102,11 +102,11 @@ async def process_hit():
     status = []
     hit = processedAdsTable.get((where('hit_id') == current_hit['id']) & (where('search_id') == current_search['id']))
     # the hit is already in the database, no changes -> skip   
-    if hit is not None and hit.get('price') == current_hit['price'] and hit.get('description') == current_hit['description'] and hit.get('title') == current_hit['title']:
+    if hit is not None and hit.get('price') == current_hit['price'] and hit.get('description') == current_hit['highlighted_description'] and hit.get('title') == current_hit['title']:
         return
     # new hit
     if hit is None:
-        processedAdsTable.insert({'search_id': current_search['id'], 'hit_id': current_hit['id'], 'title': current_hit['title'], 'price': current_hit['price'], 'description': current_hit['description']})
+        processedAdsTable.insert({'search_id': current_search['id'], 'hit_id': current_hit['id'], 'title': current_hit['title'], 'price': current_hit['price'], 'description': current_hit['highlighted_description']})
         status.append('ad')
     else:
         # new price for existing hit    
@@ -144,11 +144,30 @@ async def screenshot():
 db = TinyDB(Path(__file__).with_name('db.json'))
 processedAdsTable = db.table('processed')
 
-url = {
-    "x-algolia-agent": "Algolia for JavaScript (3.35.1); Browser",
-    "x-algolia-application-id": "GVLE5Z29MR",
-    "x-algolia-api-key": "fa6c9390760eb58e3197d2689a2a16f9"
-}
+header = {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+        "Accept": "application/vnd.wamland+json; version=1",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Connection": "keep-alive",
+        "Host":"api.annonces.nc",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-GPC": "1",
+        "If-None-Match": "W/\"fe5873a8a05044232d81be69f50e46b8\"",
+        "Priority": "u=4",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Origin": "https://annonces.nc",
+        "Referer": "https://annonces.nc/",
+        "Sec-Ch-Ua-Mobile": "?1",
+        "Sec-Ch-Ua-Platform": "Android",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Gpc": "1"
+    }
+
+url = "https://api.annonces.nc/posts/search"
 
 async def process():
     global browser
@@ -162,15 +181,16 @@ async def process():
             page = 0
             while (True):
                 params = {
-                    "query": search['keywords'],
+                    "by_text": search['keywords'],
                     "page": page
                 }
-                data = {"params" : urllib.parse.urlencode(params)}
-                response = requests.post('http://gvle5z29mr-dsn.algolia.net/1/indexes/Post/query?' + urllib.parse.urlencode(url), data = json.dumps(data))
+                #data = {"params" : urllib.parse.urlencode(params)}
+                #response = requests.post('http://gvle5z29mr-dsn.algolia.net/1/indexes/Post/query?' + urllib.parse.urlencode(url), data = json.dumps(data))
+                response = requests.get(url, params=params, headers=header, verify=False)
                 results = response.json()
-                if len(results['hits']) == 0:
+                if len(results) == 0:
                     break
-                for hit in results['hits']:
+                for hit in results:
                     global current_hit
                     current_hit = hit
                     await process_hit()
