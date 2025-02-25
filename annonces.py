@@ -112,7 +112,7 @@ async def send_email(status, hit_data):
             </tr>
         """
         
-        # Add custom fields if available
+        # Add custom fields if available.
         if current_hit.get('custom_fields'):
             for field_name, field_value in current_hit['custom_fields'].items():
                 if field_value and str(field_value).strip():

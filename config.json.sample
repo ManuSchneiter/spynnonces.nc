@@ -1,19 +1,19 @@
 [{
     "email": "toto@gmail.com",
     "send_email": 1,
-    "screenshot": 0,
+    "screenshot": 1,
     "searches": [
         {
             "id":1,
             "site":"automobiles.nc",
-            "keywords": "berlingo",
+            "keywords": "swift",
             "max_km": 60000,
             "min_price": 800000
         },
         {
             "id":2,
             "site":"automobiles.nc",
-            "keywords": "rifter"
+            "keywords": "suzuki"
         }
     ]
 },
@@ -24,7 +24,7 @@
         {
             "id":4,
             "site":"annonces.nc",
-            "keywords": "ampli"
+            "keywords": "cafetière"
         }
     ]
 }
